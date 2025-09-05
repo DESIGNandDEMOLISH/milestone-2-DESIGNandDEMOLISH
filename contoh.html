@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Number Guessing Game</title>
+  <style>
+    :root {
+      --bg: #0f172a;       /* slate-900 */
+      --card: #111827;     /* gray-900 */
+      --text: #e5e7eb;     /* gray-200 */
+      --muted: #9ca3af;    /* gray-400 */
+      --accent: #22c55e;   /* green-500 */
+      --accent-2: #3b82f6; /* blue-500 */
+      --danger: #ef4444;   /* red-500 */
+      --warn: #f59e0b;     /* amber-500 */
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 70% -10%, #1f2937 10%, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100svh; display: grid; place-items: center; padding: 24px;
+    }
+
+    .game {
+      width: 100%; max-width: 560px; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+    }
+
+    h1 { margin: 0 0 4px; font-size: 1.5rem; letter-spacing: .5px; }
+    p.sub { margin: 0 0 16px; color: var(--muted); }
+
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    select, input[type="number"], button {
+      background: #0b1220; color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; padding: 10px 12px; font-size: 1rem;
+      outline: none; transition: border-color .2s, transform .02s ease;
+    }
+
+    select:focus, input[type="number"]:focus { border-color: var(--accent-2); }
+
+    button { cursor: pointer; font-weight: 600; }
+    button:active { transform: translateY(1px); }
+
+    .btn-primary { background: var(--accent-2); border-color: transparent; color: white; }
+    .btn-secondary { background: #0b1220; }
+    .btn-reset { background: var(--warn); border-color: transparent; color: #1f2937; }
+    .btn-disabled { opacity: .6; cursor: not-allowed; }
+
+    .status { margin-top: 16px; padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.14); }
+    .status strong { color: white; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .card {
+      background: #0b1220; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;
+    }
+    .muted { color: var(--muted); font-size: .95rem; }
+    .success { border-color: rgba(34,197,94,.5) !important; background: rgba(34,197,94,.08); }
+    .error   { border-color: rgba(239,68,68,.5) !important; background: rgba(239,68,68,.08); }
+    .hint    { border-color: rgba(59,130,246,.5) !important; background: rgba(59,130,246,.08); }
+
+    .footer { margin-top: 16px; display: flex; gap: 8px; }
+
+    small { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main class="game" role="application" aria-label="Number Guessing Game">
+    <h1>Number Guessing Game</h1>
+    <p class="sub">Guess the secret number before you run out of attempts.</p>
+
+    <div class="row" style="margin-bottom:12px">
+      <label for="difficulty" class="muted" style="align-self:center">Difficulty:</label>
+      <select id="difficulty" aria-label="Select difficulty">
+        <option value="easy">Easy (1–50, 10 tries)</option>
+        <option value="normal" selected>Normal (1–100, 10 tries)</option>
+        <option value="hard">Hard (1–100, 6 tries)</option>
+      </select>
+      <button id="newGame" class="btn-secondary" title="Start a new game">New Game</button>
+    </div>
+
+    <div class="row">
+      <label for="guess" class="muted" style="align-self:center">Your guess:</label>
+      <input id="guess" type="number" inputmode="numeric" placeholder="Enter a number" aria-label="Enter your guess" />
+      <button id="submit" class="btn-primary">Guess</button>
+      <button id="reset" class="btn-reset">Reset</button>
+    </div>
+
+    <div id="status" class="status hint" aria-live="polite">
+      <strong>Status:</strong> I\'m thinking of a number. Make a guess!
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="muted">Attempts left</div>
+        <div id="attempts" style="font-weight:700; font-size:1.2rem">—</div>
+      </div>
+      <div class="card">
+        <div class="muted">Range</div>
+        <div id="range" style="font-weight:700; font-size:1.2rem">—</div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="muted">Your guesses</div>
+        <div id="history" style="min-height:1.2rem">—</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <small>Tip: Press <kbd>Enter</kbd> to submit your guess.</small>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      const els = {
+        difficulty: document.getElementById('difficulty'),
+        newGame: document.getElementById('newGame'),
+        guess: document.getElementById('guess'),
+        submit: document.getElementById('submit'),
+        reset: document.getElementById('reset'),
+        status: document.getElementById('status'),
+        attempts: document.getElementById('attempts'),
+        range: document.getElementById('range'),
+        history: document.getElementById('history')
+      };
+
+      let secret = 0;
+      let max = 100;
+      let tries = 10;
+      let triesLeft = tries;
+      const guesses = [];
+
+      function rand(max){
+        return Math.floor(Math.random() * max) + 1; // 1..max inclusive
+      }
+
+      function configureByDifficulty(){
+        const d = els.difficulty.value;
+        if(d === 'easy'){ max = 50; tries = 10; }
+        else if(d === 'hard'){ max = 100; tries = 6; }
+        else { max = 100; tries = 10; }
+        els.range.textContent = `1 – ${max}`;
+      }
+
+      function setStatus(text, type){
+        els.status.className = 'status ' + (type || 'hint');
+        els.status.innerHTML = `<strong>Status:</strong> ${text}`;
+      }
+
+      function updateUI(){
+        els.attempts.textContent = triesLeft;
+        els.history.textContent = guesses.length ? guesses.join(', ') : '—';
+        els.submit.disabled = triesLeft <= 0;
+        els.submit.classList.toggle('btn-disabled', els.submit.disabled);
+        els.guess.disabled = triesLeft <= 0;
+      }
+
+      function newGame(){
+        configureByDifficulty();
+        secret = rand(max);
+        triesLeft = tries;
+        guesses.length = 0;
+        setStatus("I'm thinking of a number. Make a guess!", 'hint');
+        updateUI();
+        els.guess.value = '';
+        els.guess.focus();
+        // console.log('Secret for debugging:', secret);
+      }
+
+      function resetAll(){
+        els.difficulty.value = 'normal';
+        newGame();
+      }
+
+      function handleGuess(){
+        const v = Number(els.guess.value.trim());
+        if(!Number.isFinite(v)){
+          setStatus('Please enter a valid number.', 'error');
+          return;
+        }
+        if(v < 1 || v > max){
+          setStatus(`Your guess must be between 1 and ${max}.`, 'error');
+          return;
+        }
+
+        guesses.push(v);
+        triesLeft--;
+
+        if(v === secret){
+          setStatus(`Correct! ${v} is the secret number. You won in ${guesses.length} ${guesses.length === 1 ? 'try' : 'tries'}!`, 'success');
+          triesLeft = 0; // end game
+        } else if(triesLeft === 0){
+          setStatus(`Out of tries! The number was ${secret}.`, 'error');
+        } else if(v < secret){
+          setStatus('Too low! Try a higher number.', 'hint');
+        } else {
+          setStatus('Too high! Try a lower number.', 'hint');
+        }
+
+        updateUI();
+        els.guess.select();
+      }
+
+      // Event listeners
+      els.submit.addEventListener('click', handleGuess);
+      els.reset.addEventListener('click', resetAll);
+      els.newGame.addEventListener('click', newGame);
+      els.difficulty.addEventListener('change', newGame);
+      els.guess.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter') handleGuess();
+      });
+
+      // Initialize
+      newGame();
+    })();
+  </script>
+</body>
+</html>

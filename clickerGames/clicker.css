@@ -1,0 +1,21 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin-top: 50px;
+}
+
+#clickButton {
+  font-size: 24px;
+  padding: 20px 40px;
+  cursor: pointer;
+}
+
+#score {
+  font-size: 20px;
+  margin: 20px 0;
+}
+
+#timer {
+  font-size: 18px;
+  margin: 10px 0;
+}

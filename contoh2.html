@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Number Guessing Game</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22c55e;
+      --accent-2: #3b82f6;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu;
+      background: radial-gradient(1200px 600px at 70% -10%, #1f2937 10%, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100svh; display: grid; place-items: center; padding: 24px;
+    }
+
+    .game {
+      width: 100%; max-width: 560px; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+    }
+
+    h1 { margin: 0 0 4px; font-size: 1.5rem; letter-spacing: .5px; }
+    p.sub { margin: 0 0 16px; color: var(--muted); }
+
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    select, input[type="number"], button {
+      background: #0b1220; color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; padding: 10px 12px; font-size: 1rem;
+      outline: none; transition: border-color .2s, transform .02s ease;
+    }
+
+    button { cursor: pointer; font-weight: 600; }
+    button:active { transform: translateY(1px); }
+
+    .btn-primary { background: var(--accent-2); border-color: transparent; color: white; }
+    .btn-secondary { background: #0b1220; }
+    .btn-reset { background: var(--warn); border-color: transparent; color: #1f2937; }
+
+    .status { margin-top: 16px; padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.14); }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .card {
+      background: #0b1220; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;
+    }
+
+    .popup {
+      position: fixed; inset: 0; display: none; place-items: center;
+      background: rgba(0,0,0,0.6); z-index: 999;
+    }
+    .popup-content {
+      background: var(--card); padding: 24px; border-radius: 16px;
+      text-align: center; max-width: 400px; width: 90%;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+    .popup-content h2 { margin: 0 0 12px; }
+    .popup-content button { margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <main class="game" role="application">
+    <h1>Number Guessing Game</h1>
+    <p class="sub">Guess the secret number before you run out of attempts.</p>
+
+    <div class="row" style="margin-bottom:12px">
+      <label for="difficulty" class="muted" style="align-self:center">Difficulty:</label>
+      <select id="difficulty">
+        <option value="easy">Easy (1–50, 10 tries)</option>
+        <option value="normal" selected>Normal (1–100, 10 tries)</option>
+        <option value="hard">Hard (1–100, 6 tries)</option>
+      </select>
+      <button id="newGame" class="btn-secondary">New Game</button>
+    </div>
+
+    <div class="row">
+      <label for="guess" class="muted" style="align-self:center">Your guess:</label>
+      <input id="guess" type="number" placeholder="Enter a number" />
+      <button id="submit" class="btn-primary">Guess</button>
+      <button id="reset" class="btn-reset">Reset</button>
+    </div>
+
+    <div id="status" class="status">Status: I'm thinking of a number. Make a guess!</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="muted">Attempts left</div>
+        <div id="attempts">—</div>
+      </div>
+      <div class="card">
+        <div class="muted">Range</div>
+        <div id="range">—</div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="muted">Your guesses</div>
+        <div id="history">—</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Popup -->
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <h2 id="popup-message"></h2>
+      <button id="popup-restart" class="btn-primary">Start Over</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const els = {
+        difficulty: document.getElementById('difficulty'),
+        newGame: document.getElementById('newGame'),
+        guess: document.getElementById('guess'),
+        submit: document.getElementById('submit'),
+        reset: document.getElementById('reset'),
+        status: document.getElementById('status'),
+        attempts: document.getElementById('attempts'),
+        range: document.getElementById('range'),
+        history: document.getElementById('history'),
+        popup: document.getElementById('popup'),
+        popupMsg: document.getElementById('popup-message'),
+        popupRestart: document.getElementById('popup-restart')
+      };
+
+      let secret = 0, max = 100, tries = 10, triesLeft = tries;
+      const guesses = [];
+
+      function rand(max){ return Math.floor(Math.random()*max)+1; }
+      function configure(){
+        if(els.difficulty.value==='easy'){ max=50; tries=10; }
+        else if(els.difficulty.value==='hard'){ max=100; tries=6; }
+        else { max=100; tries=10; }
+        els.range.textContent = `1 – ${max}`;
+      }
+      function updateUI(){
+        els.attempts.textContent = triesLeft;
+        els.history.textContent = guesses.length ? guesses.join(', ') : '—';
+      }
+      function newGame(){
+        configure();
+        secret = rand(max);
+        triesLeft = tries;
+        guesses.length = 0;
+        els.status.textContent = "Status: I'm thinking of a number. Make a guess!";
+        updateUI();
+        els.guess.value = '';
+      }
+
+      function showPopup(message){
+        els.popupMsg.textContent = message;
+        els.popup.style.display = 'grid';
+      }
+      function closePopup(){ els.popup.style.display = 'none'; }
+
+      function handleGuess(){
+        const v = Number(els.guess.value);
+        if(!Number.isFinite(v) || v<1 || v>max){
+          els.status.textContent = `Enter a number between 1 and ${max}`;
+          return;
+        }
+        guesses.push(v);
+        triesLeft--;
+
+        if(v===secret){
+          showPopup(`🎉 You won! The number was ${secret}`);
+        } else if(triesLeft===0){
+          showPopup(`😢 You lost! The number was ${secret}`);
+        } else if(v<secret){
+          els.status.textContent = 'Too low! Try a higher number.';
+        } else {
+          els.status.textContent = 'Too high! Try a lower number.';
+        }
+        updateUI();
+      }
+
+      els.submit.addEventListener('click', handleGuess);
+      els.reset.addEventListener('click', newGame);
+      els.newGame.addEventListener('click', newGame);
+      els.difficulty.addEventListener('change', newGame);
+      els.guess.addEventListener('keydown', e=>{ if(e.key==='Enter') handleGuess(); });
+      els.popupRestart.addEventListener('click', ()=>{ closePopup(); newGame(); });
+
+      newGame();
+    })();
+  </script>
+</body>
+</html>
