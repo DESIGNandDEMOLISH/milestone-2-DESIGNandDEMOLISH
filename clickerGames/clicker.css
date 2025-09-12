@@ -1,4 +1,14 @@
 body {
+  height: 100vh;
+  background-image: url("../Image/gameconsole01.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: white;
+  scroll-behavior: smooth;
+}
+
+section   {
   font-family: Arial, sans-serif;
   text-align: center;
   margin-top: 50px;
@@ -8,6 +18,25 @@ body {
   font-size: 24px;
   padding: 20px 40px;
   cursor: pointer;
+  border-radius: 20px;
+  box-shadow: 10px 20px 10px black;
+}
+
+.back {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+button  {
+  background-color: gray;
+  border-radius: 30px;
+  border-width: 5px;
+}
+
+.back-home  {
+  text-decoration: none;
+  color: white;
 }
 
 #score {

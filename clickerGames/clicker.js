@@ -10,18 +10,20 @@ const resultDisplay = document.getElementById("result");
 button.addEventListener("click", () => {
   if (gameActive) {
     score++;
-    scoreDisplay.textContent = "Score: " + score;
+    scoreDisplay.textContent = `Score: ${score}`;
+
+    if (button) { button.addEventListener("click", () => {}); }
   }
 });
 
 const countdown = setInterval(() => {
   timeLeft--;
-  timerDisplay.textContent = "Time left: " + timeLeft + "s";
+  timerDisplay.textContent = `Time left: ${timeLeft} s`;
 
   if (timeLeft <= 0) {
     clearInterval(countdown);
     gameActive = false;
-    resultDisplay.textContent = "Game Over! Final Score: " + score;
+    resultDisplay.textContent = `Game Over! Final Score: ${score}`;
     button.disabled = true;
   }
 }, 1000);

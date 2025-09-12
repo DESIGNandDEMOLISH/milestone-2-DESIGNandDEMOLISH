@@ -12,15 +12,21 @@
 <body>
     <nav>
         <ul>
-            <li>Home</li>
-            <li>Games</li>
-            <li>Contact Us</li>
+            <li>
+                <a class="link" href="#home">Home</a>
+            </li>
+            <li>
+                <a class="link" href="#games">Games</a>
+            </li>
+            <li>
+                <a class="link" href="#contact">Contact Us</a>
+            </li>
         </ul>
     </nav>
 
 <!-----This is header----->
 
-    <header>
+    <header id="home">
         <h1>
             Mini Game Project
         </h1>
@@ -29,7 +35,7 @@
 <!-----This is Main------>
 
     <main>
-        <section>
+        <section class="intro">
             <h2>
                 Introduction
             </h2>
@@ -41,19 +47,56 @@
         </section>
 
         <section>
-            <h2>
+            <h2 id="games">
                 Games
             </h2>
-            <h3>
-                <a href="Numbergues/Number.html">Number Guessing Game</a>  
-            </h3>
-            <h3>
-                <a href="RockPaper/Rock.html">Rock Paper Scissor</a>  
-            </h3>
-            <h3>
-                <a href="clickerGames/clicker.html">Clicker</a>  
-            </h3>
+            
+            <div class="numbers">
+                <h3>Number Guessing Game</h3>
+                    <p>
+                        This is a game about guessing numbers the computer choose from between 1 - 100. 
+                        You must choose the correct numbers within 10 attempts.
+                    </p>
+                    <div class="play">
+                        <button><a href="Numbergues/Number.html" class="link">Play Now</a></button>
+                    </div>
+            </div>
+
+            <div class="rock">
+                <h3>Rock Paper Scissors</h3>
+                    <p>
+                        This is a simple game that need you tho choose between <i>Rock, Papaer,</i> and <i>Scissors</i>
+                        to beat the computer.
+                    </p>
+                    <div class="play">
+                        <button><a href="RockPaper/Rock.html" class="link">Play Now</a></button>
+                    </div>
+            </div>
+
+            <div class="clicker">
+                <h3>Clicker</h3>
+                    <p>
+                        This game is about cliking as fast as you can until the times run out.
+                    </p>
+                    <div class="play">
+                        <button><a href="clickerGames/clicker.html" class="link">Play Now</a></button>
+                    </div>
+            </div>
         </section>
     </main>
+    <footer>
+        <section id="contact">
+                <address>
+                    <ul>
+                        <li class="contact-link"><a class="link" href="mailto:alexander.chua.ac@gmail.com" target="_blank">Email me</a></li>
+                        <li class="contact-link"><a class="link" href="https://github.com/DESIGNandDEMOLISH" target="_blank">Github</a></li>
+                        <li class="contact-link"><a class="link" href="https://www.linkedin.com/in/alex-chua-97346b331" target="_blank">Linkedin</a></li>
+                        <li class="contact-link"><a class="link" href="https://wa.me/6285761398910" target="_blank">WhatsApp</a></li>
+                    </ul>
+                </address>
+        </section>
+ 
+            <p>&copy; 2025 Alexander | All rights reserved.</p>
+    </footer>
 </body>
 </html>
