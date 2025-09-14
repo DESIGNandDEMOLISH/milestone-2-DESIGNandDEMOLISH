@@ -20,6 +20,9 @@ const SELECTIONS = [
        }
 ]
 
+const resultElements = [];
+
+
 selectionButtons.forEach(selectionButtons => {
     selectionButtons.addEventListener('click', e => {
         const selectionName = selectionButtons.dataset.selection;
@@ -45,12 +48,18 @@ function incrementScore(scoreSpan) {
 }
 
 function addSelectionResult(selection, winner) {
+
+    if (resultElements.length >= 6) {
+        const oldestElement = resultElements.shift();
+        oldestElement.remove();
+    }
+
     const div = document.createElement('div');
     div.innerText = selection.emoji;
     div.classList.add('result-selection');
     if (winner) div.classList.add('winner');
     finalColumn.after(div);
-
+    resultElements.push(div);
 }
 
 function isWinner(selection, opponentSelection) {
